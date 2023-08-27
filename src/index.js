@@ -1,10 +1,22 @@
 import './styles.css';
-import knightIMG from './images/knight.jpg'
+import knightIMG from './images/knight.png'
 
-/* let knight = document.createElement('img')
-knight.src = knightIMG
-knight.width = knight.height = 50
- */
+const sideBar = document.querySelector('.sidebar')
+const submitPosition = document.createElement('button')
+const clearBoard = document.createElement('button')
+const outputBox = document.createElement('div')
+sideBar.appendChild(submitPosition)
+sideBar.appendChild(clearBoard)
+sideBar.appendChild(outputBox)
+submitPosition.className = "submitPosition"
+submitPosition.textContent = "Submit Position"
+clearBoard.className = "clearBoard"
+clearBoard.textContent = "Clear Board"
+outputBox.className = "outputBox"
+
+let startTarget = [4,4]
+let endTarget = [6,6]
+
 const knightDirections = [[-2,-1],[-2,1],[-1,2],[1,2],[2,1],[2,-1],[1,-2],[-1,-2]]
 
 class positionNode {
@@ -73,10 +85,11 @@ function getKnightShortestPath(startRow, startCol, targetRow, targetCol) {
 }
 
 function knightMoves(target) {
-    //document.getElementById(start).textContent = ""
+    if(target === null) return
     let knight = document.createElement('img')
     knight.src = knightIMG
-    knight.width = knight.height = 50
+    knight.width = knight.height = 75
+    document.getElementById(target).textContent = target
     document.getElementById(target).appendChild(knight)
 }
 
@@ -88,8 +101,11 @@ function outputMoveList(node) {
     }
     
     console.log("Hooray You Did it! Here are your moves!")
+    var result = "Hooray You Did it! \nHere are your moves!\n"
     for(let i = moveList.length-1; i >= 0; i--) {
-        console.log(moveList[i])
+        console.log(moveList[i] + " => ")
+        result = result + moveList[i] + (i > 0 ? " =>\n" : "")
+        outputBox.textContent = result
         knightMoves(moveList[i][0] + "-" + moveList[i][1])
     }
 
@@ -109,24 +125,56 @@ function generateGrid(size)
             let row = document.createElement('div');
             row.className = 'row';
             row.id = (k+1) + '-' +(i+1);
-            /* row.addEventListener('mouseover', () =>{
-                if(mouseToggle)
-                {
-                    row.setAttribute("style", "background-color:black;")
-                }
+            if((i % 2) == 0) {
+                if((k % 2) == 0) row.className = 'rowWhite'
+                else row.className = 'rowGrey'
+            }
+            else {
+                if((k % 2) == 0) row.className = 'rowGrey'
+                else row.className = 'rowWhite'
+            }
+            
+            row.addEventListener('click', (event) =>{
+                var id = event.target.id
+                // Make sure we are clicking on a valid square
+                if(id == "") return
+                console.log("left-click: " + id + " sliced: " + id.slice(0,1) + " " + id.slice(2,3));
+                startTarget[0] = id.slice(0,1)
+                startTarget[1] = id.slice(2,3)
+                knightMoves(startTarget[0] + "-" + startTarget[1])
+                //assign Start Position
                 
-            }) */
+            })
+            row.addEventListener('contextmenu', (event) => {
+                event.preventDefault()
+                var id = event.target.id
+                if(id == "") return
+                console.log("right-click: " + id + " sliced: " + id.slice(0,1) + " " + id.slice(2,3));
+                endTarget[0] = id.slice(0,1)
+                endTarget[1] = id.slice(2,3)
+                knightMoves(endTarget[0] + "-" + endTarget[1])
+                //assign Target Position
+                
+            });
             
             row.textContent = (k+1) + '-' +(i+1);
             column.appendChild(row);
         }
         grid.appendChild(column);
     }
+    document.getElementById("content").textContent = " "
     document.getElementById("content").appendChild(grid);
 }
 
+submitPosition.addEventListener('click', () =>{
+    generateGrid(8)
+    let result = getKnightShortestPath( parseInt(startTarget[0]), parseInt(startTarget[1]), parseInt(endTarget[0]), parseInt(endTarget[1]))
+    console.log(result)
+    outputMoveList(result)
+})
+
+clearBoard.addEventListener('click', () =>{
+    generateGrid(8)
+})
 
 generateGrid(8)
-let result = getKnightShortestPath( 7, 7, 1, 5)
-console.log(result)
-outputMoveList(result)
