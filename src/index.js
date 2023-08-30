@@ -1,5 +1,7 @@
 import './styles.css';
-import knightIMG from './images/knight.png'
+import startIMG from './images/white-knight.png'
+import endIMG from './images/red-knight.png'
+import completeIMG from './images/green-knight.png'
 
 const sideBar = document.querySelector('.sidebar')
 const submitPosition = document.createElement('button')
@@ -13,6 +15,12 @@ submitPosition.textContent = "Submit Position"
 clearBoard.className = "clearBoard"
 clearBoard.textContent = "Clear Board"
 outputBox.className = "outputBox"
+
+let startKnight = document.createElement('img')
+let endKnight = document.createElement('img')
+startKnight.src = startIMG
+endKnight.src = endIMG
+startKnight.width = startKnight.height = endKnight.width = endKnight.height = 75
 
 let startTarget = [4,4]
 let endTarget = [6,6]
@@ -31,7 +39,6 @@ class positionNode {
         return `${this.row}, ${this.col}`
     }
 }
-
 
 //Populates all possible moves from a given row and col position
 const getNeighbors = (row, col) => {
@@ -84,10 +91,10 @@ function getKnightShortestPath(startRow, startCol, targetRow, targetCol) {
     return "Out of Bounds"
 }
 
-function knightMoves(target) {
+function appendKnight(target, img) {
     if(target === null) return
     let knight = document.createElement('img')
-    knight.src = knightIMG
+    knight.src = img
     knight.width = knight.height = 75
     document.getElementById(target).textContent = target
     document.getElementById(target).appendChild(knight)
@@ -106,7 +113,10 @@ function outputMoveList(node) {
         console.log(moveList[i] + " => ")
         result = result + moveList[i] + (i > 0 ? " =>\n" : "")
         outputBox.textContent = result
-        knightMoves(moveList[i][0] + "-" + moveList[i][1])
+        if(i == moveList.length-1) appendKnight(moveList[i][0] + "-" + moveList[i][1], startIMG)
+        else if(i == 0) appendKnight(moveList[i][0] + "-" + moveList[i][1], endIMG)
+        else appendKnight(moveList[i][0] + "-" + moveList[i][1], completeIMG)
+        
     }
 
 }
@@ -133,27 +143,28 @@ function generateGrid(size)
                 if((k % 2) == 0) row.className = 'rowGrey'
                 else row.className = 'rowWhite'
             }
-            
+            // Add Event to assign start Position
             row.addEventListener('click', (event) =>{
                 var id = event.target.id
-                // Make sure we are clicking on a valid square
                 if(id == "") return
-                console.log("left-click: " + id + " sliced: " + id.slice(0,1) + " " + id.slice(2,3));
+                //console.log("left-click: " + id + " sliced: " + id.slice(0,1) + " " + id.slice(2,3));
                 startTarget[0] = id.slice(0,1)
                 startTarget[1] = id.slice(2,3)
-                knightMoves(startTarget[0] + "-" + startTarget[1])
-                //assign Start Position
+                let target = startTarget[0] + "-" + startTarget[1]
+                document.getElementById(target).textContent = target
+                document.getElementById(target).appendChild(startKnight)
                 
-            })
+            }) // Add Event to assign end Position
             row.addEventListener('contextmenu', (event) => {
                 event.preventDefault()
                 var id = event.target.id
                 if(id == "") return
-                console.log("right-click: " + id + " sliced: " + id.slice(0,1) + " " + id.slice(2,3));
+                //console.log("right-click: " + id + " sliced: " + id.slice(0,1) + " " + id.slice(2,3));
                 endTarget[0] = id.slice(0,1)
                 endTarget[1] = id.slice(2,3)
-                knightMoves(endTarget[0] + "-" + endTarget[1])
-                //assign Target Position
+                let target = endTarget[0] + "-" + endTarget[1]
+                document.getElementById(target).textContent = target
+                document.getElementById(target).appendChild(endKnight)
                 
             });
             
